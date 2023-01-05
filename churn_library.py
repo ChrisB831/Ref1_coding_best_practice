@@ -1,12 +1,12 @@
 '''
+A module to build Logistic regression and decision tree classifiers to predict churn
+for credit card customers.
+Data taken from  https://www.kaggle.com/sakshigoyal7/credit-card-customers/code
 
-library doc string
+Author: Chris Bonham
+Date: 5th January 2023
 '''
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns; sns.set()
 import pickle
 
 from sklearn.utils import resample
@@ -16,24 +16,26 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import RocCurveDisplay, classification_report
 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
+
 pd.set_option('display.max_columns', 99)
 
 
-
 def import_data(pth):
-    '''Rreturns dataframe for the csv found at pth
+    '''Returns dataframe for the csv found at pth
 
     input:
-        pth: a path to the csv
+        pth: a string containing a path to the csv
 
     output:
         df: pandas dataframe
     '''
-    print("import_data called")
-    # df = pd.read_csv(r"./data/bank_data.csv", index_col=0,  nrows = 10)
-    df = pd.read_csv(r"./data/bank_data.csv", index_col=0)
-    return(df)
-
+    df = pd.read_csv(pth, index_col=0)
+    return df
 
 
 def perform_eda(df):
@@ -44,19 +46,16 @@ def perform_eda(df):
     output:
         None
     '''
-    print("perform_eda called")
-
     # Get high level stats
     print("\nDataframe has {0} rows and {1} columns".format(df.shape[0], df.shape[1]))
-    print("\nView 10 random records\n", resample(df, n_samples=10, random_state=1234, replace=False))
+    print("\nView 10 random records\n", resample(df, n_samples=10, random_state=1234,
+                                                 replace=False))
     print("\nProportion of missing values in each column\n", df.isnull().sum() / df.shape[0])
-
 
     # Get a list of the numeric and caregorical feature names
     num_feature_names = df.select_dtypes(include='number').columns.tolist()
     num_feature_names.remove('CLIENTNUM')   # Remove the URN from the list
     cat_field_names = df.select_dtypes(include=['object','category']).columns.tolist()
-
 
     #Get distributions of numeric fields
     for feature in num_feature_names:
@@ -81,16 +80,16 @@ def perform_eda(df):
     plt.savefig(r"./images/eda/Numeric_feature_correlations.png")
 
 
-
 def derive_label(df, response = 'Churn'):
     '''Derive the target field. NB This assumes a binary classifier
 
     input:
-            df: pandas dataframe
-            response: string of response name [optional argument that could be used for naming variables or index y column]
+        df: pandas dataframe
+        response: string of response name [optional argument that could be used
+                  for naming variables or index y column]
 
     output:
-            df: pandas dataframe with new target field
+        df: pandas dataframe with new target field
     '''
     df[response] = df['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
     return df
@@ -102,30 +101,29 @@ def encoder_helper(df, cat_recode_lst, response = 'Churn'):
     proportion of churn for each category - associated with cell 16 from the notebook
 
     input:
-            df: pandas dataframe
-            cat_recode_lst: list of columns that contain categorical features to recode
-            response: string of response name [optional argument that could be used for naming variables or index y column]
+        df: pandas dataframe
+        cat_recode_lst: list of columns that contain categorical features to recode
+        response: string of response name [optional argument that could be used for
+                  naming variables or index y column]
 
     output:
-            df: pandas dataframe with new columns for
+        df: pandas dataframe with new columns for
     '''
-    print("encoder_helper called")
-
     for feature in cat_recode_lst:
         recode_map = df.groupby(feature).mean()[response]
         df["{0}_Churn".format(feature)] = df[feature].replace(recode_map)
-
     return df
 
 
-
 def perform_feature_engineering(df, cat_recode_lst, features_lst, response = 'Churn'):
-    '''
+    '''Recode the categorical features and split data into train and test datasets
+
     input:
         df: pandas dataframe
         cat_recode_lst: list of columns that contain categorical features to recode
         features_lst: list of columns to include as model features
-        response: string of response name [optional argument that could be used for naming variables or index y column]
+        response: string of response name [optional argument that could be used for
+                  naming variables or index y column]
 
     output:
         X_train: X training data features
@@ -133,8 +131,6 @@ def perform_feature_engineering(df, cat_recode_lst, features_lst, response = 'Ch
         y_train: y training data labels
         y_test: y testing data labels
     '''
-    print("perform_feature_engineering called")
-
     # Recode the categorical fields
     df = encoder_helper(df, cat_recode_lst)
 
@@ -146,50 +142,46 @@ def perform_feature_engineering(df, cat_recode_lst, features_lst, response = 'Ch
     return X_train, X_test, y_train, y_test
 
 
-
 def classification_report_image(y_train, y_test,
                                 y_train_preds_lr, y_train_preds_rf,
                                 y_test_preds_lr, y_test_preds_rf,
                                 y_train_probs_lr, y_train_probs_rf,
                                 y_test_probs_lr, y_test_probs_rf):
-    '''
-    produces classification report for training and testing results and stores report as image
-    in images folder
-    input:
-            y_train: training response values
-            y_test:  test response values
-            y_train_preds_lr: training predictions (classification) from logistic regression
-            y_train_preds_rf: training predictions (classification) from random forest
-            y_test_preds_lr: test predictions (classification) from logistic regression
-            y_test_preds_rf: test predictions (classification) from random forest
+    '''produce classification report and ROC curves for training and test data and store in
+    images folder
+    NB The probabilities are need to generate the ROC curves. I could pass the model object
+    but as the predictions have already been calculated it seems inefficient to regenrate
 
-            y_train_probs_lr: training predictions (probability) from logistic regression
-            y_train_prob_rf: training predictions (probability) from random forest
-            y_test_prob_lr: test predictions (probability) from logistic regression
-            y_test_prob_rf: test predictions (probability) from random forest
+    input:
+        y_train: training response values
+        y_test:  test response values
+        y_train_preds_lr: training predictions (classification) from logistic regression
+        y_train_preds_rf: training predictions (classification) from random forest
+        y_test_preds_lr: test predictions (classification) from logistic regression
+        y_test_preds_rf: test predictions (classification) from random forest
+        y_train_probs_lr: training predictions (probability) from logistic regression
+        y_train_prob_rf: training predictions (probability) from random forest
+        y_test_prob_lr: test predictions (probability) from logistic regression
+        y_test_prob_rf: test predictions (probability) from random forest
 
     output:
              None
     '''
-    print("classification_report_image called")
-
-
     # Classification report as text
-    fp = open(r"./images/results/classification_report.txt", "w")
-    fp.write('Random forest results')
-    fp.write('\nTest results\n')
-    fp.write(classification_report(y_test, y_test_preds_rf))
-    fp.write('\nTrain results\n')
-    fp.write(classification_report(y_train, y_train_preds_rf))
-    fp.write('\n\nLogistic regression results')
-    fp.write('\nTest results\n')
-    fp.write(classification_report(y_test, y_test_preds_lr))
-    fp.write('\nTrain results\n')
-    fp.write(classification_report(y_train, y_train_preds_lr))
-    fp.close()
+    file = open(r"./images/results/classification_report.txt", "w")
+    file.write('Random forest results')
+    file.write('\nTest results\n')
+    file.write(classification_report(y_test, y_test_preds_rf))
+    file.write('\nTrain results\n')
+    file.write(classification_report(y_train, y_train_preds_rf))
+    file.write('\n\nLogistic regression results')
+    file.write('\nTest results\n')
+    file.write(classification_report(y_test, y_test_preds_lr))
+    file.write('\nTrain results\n')
+    file.write(classification_report(y_train, y_train_preds_lr))
+    file.close()
 
-
-    # Train ROC curve
+    # Train data ROC curve
     plt.figure(figsize=(15, 8))
     ax = plt.gca()
     RocCurveDisplay.from_predictions(y_train, y_train_probs_lr, name = 'LogReg', ax=ax)
@@ -199,8 +191,7 @@ def classification_report_image(y_train, y_test,
     plt.ylabel("False positive rate")
     plt.savefig(r"./images/results/Train ROC curve.png")
 
-
-    # Test ROC curve
+    # Test data ROC curve
     plt.figure(figsize=(15, 8))
     ax = plt.gca()
     RocCurveDisplay.from_predictions(y_test, y_test_probs_lr, name = 'LogReg', ax=ax)
@@ -211,10 +202,8 @@ def classification_report_image(y_train, y_test,
     plt.savefig(r"./images/results/Test ROC curve.png")
 
 
-
 def feature_importance_plot(model, features_lst, output_pth):
-    '''
-    creates and stores the feature importances in pth
+    '''creates feature importance chart and store in output_pth
 
     input:
         model: model object containing feature_importances_
@@ -224,8 +213,6 @@ def feature_importance_plot(model, features_lst, output_pth):
     output:
         None
     '''
-    print("feature_importance_plot called")
-
     # Get feature importance
     importances = model.feature_importances_
 
@@ -242,28 +229,24 @@ def feature_importance_plot(model, features_lst, output_pth):
     plt.savefig(output_pth)
 
 
-
 def train_models(X_train, X_test, y_train, y_test, features_lst):
-    '''
-    train, store model results: images + scores, and store models
+    '''Train, assess and save models
+
     input:
-              X_train: X training data
-              X_test: X testing data
-              y_train: y training data
-              y_test: y testing data
-              features_lst: list of columns to include as model features
+          X_train: X training data
+          X_test: X testing data
+          y_train: y training data
+          y_test: y testing data
+          features_lst: list of columns to include as model features
 
     output:
-              None
+          None
     '''
-    print("train_models called")
-
     # Initialise the models
     rfc = RandomForestClassifier(random_state=42)
     lrc = LogisticRegression(solver='lbfgs', max_iter=3000)
 
-
-    # Define  the random forest hyperparameter search space
+    # Define the random forest hyperparameter search space
     param_grid = {
         'n_estimators': [200, 500],
         'max_features': ['log2', 'sqrt'],       # Auto has been depreciated
@@ -276,7 +259,6 @@ def train_models(X_train, X_test, y_train, y_test, features_lst):
     cv_rfc.fit(X_train, y_train)
     lrc.fit(X_train, y_train)
 
-
     # Get train and test scores (probability and classification)
     # Probability is needed for the RocCurveDisplay.from_predictions() call
     y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
@@ -288,7 +270,6 @@ def train_models(X_train, X_test, y_train, y_test, features_lst):
     y_test_preds_lr = lrc.predict(X_test)
     y_test_probs_lr = lrc.predict_proba(X_test)[:,1]
 
-
     # Get classification_reports and ROC curves
     classification_report_image(y_train, y_test,
                                 y_train_preds_lr, y_train_preds_rf,
@@ -296,17 +277,15 @@ def train_models(X_train, X_test, y_train, y_test, features_lst):
                                 y_train_probs_lr, y_train_probs_rf,
                                 y_test_probs_lr, y_test_probs_rf)
 
-
     # Get feature importances for random forest
-    feature_importance_plot(cv_rfc.best_estimator_, features_lst, r"./images/results/RF feature importance.png")
-
+    feature_importance_plot(cv_rfc.best_estimator_, features_lst,
+                            r"./images/results/RF feature importance.png")
 
     # Save models
-    with open(r"./models/rfc_model.pkl", "wb") as fp:
-        pickle.dump(cv_rfc, fp)
-    with open(r"./models/logistic_model.pkl", "wb") as fp:
-        pickle.dump(lrc, fp)
-
+    with open(r"./models/rfc_model.pkl", "wb") as file:
+        pickle.dump(cv_rfc, file)
+    with open(r"./models/logistic_model.pkl", "wb") as file:
+        pickle.dump(lrc, file)
 
 
 def main():
@@ -318,9 +297,11 @@ def main():
     output:
         None
     '''
-
+    # Define parameters
     raw_data_path = r".\data\bank_data.csv"
-    cat_recode_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category', 'Card_Category']
+    cat_recode_lst = [
+        'Gender', 'Education_Level', 'Marital_Status', 'Income_Category', 'Card_Category'
+    ]
     features_lst = [
         'Customer_Age', 'Dependent_count', 'Months_on_book',
         'Total_Relationship_Count', 'Months_Inactive_12_mon',
@@ -331,13 +312,14 @@ def main():
         'Income_Category_Churn', 'Card_Category_Churn'
     ]
 
-    print('main called')
     custs = import_data(raw_data_path)
     custs = derive_label(custs)
     perform_eda(custs)
-    X_train, X_test, y_train, y_test = perform_feature_engineering(custs, cat_recode_lst, features_lst)
+    X_train, X_test, y_train, y_test = perform_feature_engineering(custs, cat_recode_lst,
+                                                                   features_lst)
     train_models(X_train, X_test, y_train, y_test, features_lst)
 
 
+# Top level script entry point
 if __name__ == "__main__":
     main()
