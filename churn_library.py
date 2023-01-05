@@ -334,7 +334,7 @@ def main():
     print('main called')
     custs = import_data(raw_data_path)
     custs = derive_label(custs)
-    #perform_eda(custs)
+    perform_eda(custs)
     X_train, X_test, y_train, y_test = perform_feature_engineering(custs, cat_recode_lst, features_lst)
     train_models(X_train, X_test, y_train, y_test, features_lst)
 
