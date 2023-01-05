@@ -8,6 +8,7 @@ logging.basicConfig(
     filemode='w',
     format='%(name)s - %(levelname)s - %(message)s')
 
+
 def test_import(import_data):
 	'''
 	test data import - this example is completed for you to assist with the other test functions

@@ -34,7 +34,7 @@ def perform_eda(df):
 def encoder_helper(df, category_lst, response):
     '''
     helper function to turn each categorical column into a new column with
-    propotion of churn for each category - associated with cell 15 from the notebook
+    proportion of churn for each category - associated with cell 16 from the notebook
 
     input:
             df: pandas dataframe
@@ -59,6 +59,22 @@ def perform_feature_engineering(df, response):
               y_train: y training data
               y_test: y testing data
     '''
+    pass
+
+
+def train_models(X_train, X_test, y_train, y_test):
+    '''
+    train, store model results: images + scores, and store models
+    input:
+              X_train: X training data
+              X_test: X testing data
+              y_train: y training data
+              y_test: y testing data
+    output:
+              None
+    '''
+    pass
+
 
 def classification_report_image(y_train,
                                 y_test,
@@ -96,15 +112,4 @@ def feature_importance_plot(model, X_data, output_pth):
     '''
     pass
 
-def train_models(X_train, X_test, y_train, y_test):
-    '''
-    train, store model results: images + scores, and store models
-    input:
-              X_train: X training data
-              X_test: X testing data
-              y_train: y training data
-              y_test: y testing data
-    output:
-              None
-    '''
-    pass
+
