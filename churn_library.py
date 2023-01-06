@@ -35,6 +35,7 @@ def import_data(pth):
         df: pandas dataframe
     '''
     df = pd.read_csv(pth, index_col=0)
+    # df = pd.read_csv(pth, index_col=0, nrows = 5)
     return df
 
 
@@ -47,10 +48,10 @@ def perform_eda(df):
         None
     '''
     # Get high level stats
-    print("\nDataframe has {0} rows and {1} columns".format(df.shape[0], df.shape[1]))
-    print("\nView 10 random records\n", resample(df, n_samples=10, random_state=1234,
-                                                 replace=False))
-    print("\nProportion of missing values in each column\n", df.isnull().sum() / df.shape[0])
+    # print("\nDataframe has {0} rows and {1} columns".format(df.shape[0], df.shape[1]))
+    # print("\nView 10 random records\n", resample(df, n_samples=10, random_state=1234,
+    #                                              replace=False))
+    # print("\nProportion of missing values in each column\n", df.isnull().sum() / df.shape[0])
 
     # Get a list of the numeric and caregorical feature names
     num_feature_names = df.select_dtypes(include='number').columns.tolist()
@@ -63,7 +64,7 @@ def perform_eda(df):
         plt.title("Distribution of {0}".format(feature))
         plt.xlabel(feature)
         plt.ylabel('Count')
-        plt.savefig(r"./images/eda/{0}_distribution.png".format(feature))
+        plt.savefig(r".\images\eda\{0}_distribution.png".format(feature))
 
     # Get distributions of categorical fields
     for feature in cat_field_names:
@@ -71,13 +72,13 @@ def perform_eda(df):
         plt.title("Distribution of {0}".format(feature))
         plt.xlabel(feature)
         plt.ylabel('Count')
-        plt.savefig(r"./images/eda/{0}_distribution.png".format(feature))
+        plt.savefig(r".\images\eda\{0}_distribution.png".format(feature))
 
     # Get correlations of the numeric fields
     plt.figure(figsize=(20,10))
     sns.heatmap(df[num_feature_names].corr(), annot=False, cmap='Dark2_r', linewidths=2)
     plt.title("Numeric feature correlations")
-    plt.savefig(r"./images/eda/Numeric_feature_correlations.png")
+    plt.savefig(r".\images\eda\Numeric_feature_correlations.png")
 
 
 def derive_label(df, response = 'Churn'):
@@ -168,7 +169,7 @@ def classification_report_image(y_train, y_test,
              None
     '''
     # Classification report as text
-    file = open(r"./images/results/classification_report.txt", "w")
+    file = open(r".\images\results\classification_report.txt", "w")
     file.write('Random forest results')
     file.write('\nTest results\n')
     file.write(classification_report(y_test, y_test_preds_rf))
@@ -189,7 +190,7 @@ def classification_report_image(y_train, y_test,
     plt.title("Train ROC")
     plt.xlabel("True positive rate")
     plt.ylabel("False positive rate")
-    plt.savefig(r"./images/results/Train ROC curve.png")
+    plt.savefig(r".\images\results\Train ROC curve.png")
 
     # Test data ROC curve
     plt.figure(figsize=(15, 8))
@@ -199,7 +200,7 @@ def classification_report_image(y_train, y_test,
     plt.title("Test ROC")
     plt.xlabel("True positive rate")
     plt.ylabel("False positive rate")
-    plt.savefig(r"./images/results/Test ROC curve.png")
+    plt.savefig(r".\images\results\Test ROC curve.png")
 
 
 def feature_importance_plot(model, features_lst, output_pth):
@@ -279,12 +280,12 @@ def train_models(X_train, X_test, y_train, y_test, features_lst):
 
     # Get feature importances for random forest
     feature_importance_plot(cv_rfc.best_estimator_, features_lst,
-                            r"./images/results/RF feature importance.png")
+                            r".\images\results\RF feature importance.png")
 
     # Save models
-    with open(r"./models/rfc_model.pkl", "wb") as file:
+    with open(r".\models\rfc_model.pkl", "wb") as file:
         pickle.dump(cv_rfc, file)
-    with open(r"./models/logistic_model.pkl", "wb") as file:
+    with open(r".\models\logistic_model.pkl", "wb") as file:
         pickle.dump(lrc, file)
 
 
