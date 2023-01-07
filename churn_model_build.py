@@ -4,7 +4,7 @@ for credit card customers.
 Data taken from  https://www.kaggle.com/sakshigoyal7/credit-card-customers/code
 
 Author: Chris Bonham
-Date: 8th January 2023
+Date: 7th January 2023
 '''
 import pickle
 from sklearn.utils import resample
@@ -35,7 +35,7 @@ def import_data(pth):
     return df
 
 
-def derive_label(df, response = 'Churn'):
+def derive_label(df, response='Churn'):
     '''Derive the target field. NB This assumes a binary classifier
 
     input:
@@ -45,7 +45,8 @@ def derive_label(df, response = 'Churn'):
     output:
         df: pandas dataframe with new target field
     '''
-    df[response] = df['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
+    df[response] = df['Attrition_Flag'].apply(
+        lambda val: 0 if val == "Existing Customer" else 1)
     return df
 
 
@@ -66,11 +67,12 @@ def perform_eda(df):
     # Get a list of the numeric and caregorical feature names
     num_feature_names = df.select_dtypes(include='number').columns.tolist()
     num_feature_names.remove('CLIENTNUM')   # Remove the URN from the list
-    cat_field_names = df.select_dtypes(include=['object','category']).columns.tolist()
+    cat_field_names = df.select_dtypes(
+        include=['object', 'category']).columns.tolist()
 
-    #Get distributions of numeric fields
+    # Get distributions of numeric fields
     for feature in num_feature_names:
-        sns.displot(df[feature], kde = True)
+        sns.displot(df[feature], kde=True)
         plt.title("Distribution of {0}".format(feature))
         plt.xlabel(feature)
         plt.ylabel('Count')
@@ -85,13 +87,17 @@ def perform_eda(df):
         plt.savefig(r".\images\eda\{0}_distribution.png".format(feature))
 
     # Get correlations of the numeric fields
-    plt.figure(figsize=(20,10))
-    sns.heatmap(df[num_feature_names].corr(), annot=False, cmap='Dark2_r', linewidths=2)
+    plt.figure(figsize=(20, 10))
+    sns.heatmap(
+        df[num_feature_names].corr(),
+        annot=False,
+        cmap='Dark2_r',
+        linewidths=2)
     plt.title("Numeric feature correlations")
     plt.savefig(r".\images\eda\Numeric_feature_correlations.png")
 
 
-def encoder_helper(df, cat_recode_lst, response = 'Churn'):
+def encoder_helper(df, cat_recode_lst, response='Churn'):
     '''
     helper function to turn each categorical column into a new column with
     proportion of churn for each category - associated with cell 16 from the notebook
@@ -110,7 +116,11 @@ def encoder_helper(df, cat_recode_lst, response = 'Churn'):
     return df
 
 
-def perform_feature_engineering(df, cat_recode_lst, features_lst, response = 'Churn'):
+def perform_feature_engineering(
+        df,
+        cat_recode_lst,
+        features_lst,
+        response='Churn'):
     '''Recode the categorical features and split data into train and test datasets
 
     input:
@@ -131,7 +141,8 @@ def perform_feature_engineering(df, cat_recode_lst, features_lst, response = 'Ch
     # Split into train and test datasets
     y = df[response]
     X = df[features_lst]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.3, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.3, random_state=42)
 
     return X_train, X_test, y_train, y_test
 
@@ -158,7 +169,7 @@ def classification_report_image(y_train, y_test,
         y_test_prob_lr: test predictions (probability) from logistic regression
         y_test_prob_rf: test predictions (probability) from random forest
     output:
-             None
+        None
     '''
     # Classification report as text
     file = open(r".\images\results\classification_report.txt", "w")
@@ -177,8 +188,10 @@ def classification_report_image(y_train, y_test,
     # Train data ROC curve
     plt.figure(figsize=(15, 8))
     ax = plt.gca()
-    RocCurveDisplay.from_predictions(y_train, y_train_probs_lr, name = 'LogReg', ax=ax)
-    RocCurveDisplay.from_predictions(y_train, y_train_probs_rf, name = 'RandForest', ax=ax)
+    RocCurveDisplay.from_predictions(
+        y_train, y_train_probs_lr, name='LogReg', ax=ax)
+    RocCurveDisplay.from_predictions(
+        y_train, y_train_probs_rf, name='RandForest', ax=ax)
     plt.title("Train ROC")
     plt.xlabel("True positive rate")
     plt.ylabel("False positive rate")
@@ -187,8 +200,10 @@ def classification_report_image(y_train, y_test,
     # Test data ROC curve
     plt.figure(figsize=(15, 8))
     ax = plt.gca()
-    RocCurveDisplay.from_predictions(y_test, y_test_probs_lr, name = 'LogReg', ax=ax)
-    RocCurveDisplay.from_predictions(y_test, y_test_probs_rf, name = 'RandForest', ax=ax)
+    RocCurveDisplay.from_predictions(
+        y_test, y_test_probs_lr, name='LogReg', ax=ax)
+    RocCurveDisplay.from_predictions(
+        y_test, y_test_probs_rf, name='RandForest', ax=ax)
     plt.title("Test ROC")
     plt.xlabel("True positive rate")
     plt.ylabel("False positive rate")
@@ -213,8 +228,12 @@ def feature_importance_plot(model, features_lst, output_pth):
     sorted_features_lst = [features_lst[i] for i in indices]
 
     # Plot the feature importance
-    plt.figure(figsize=(15,15))
-    plt.bar(range(len(sorted_features_lst)), importances[indices], tick_label = sorted_features_lst)
+    plt.figure(figsize=(15, 15))
+    plt.bar(
+        range(
+            len(sorted_features_lst)),
+        importances[indices],
+        tick_label=sorted_features_lst)
     plt.title("Feature Importance")
     plt.ylabel('Importance')
     plt.xticks(rotation=45)
@@ -253,13 +272,13 @@ def train_models(X_train, X_test, y_train, y_test, features_lst):
     # Get train and test scores (probability and classification)
     # Probability is needed for the RocCurveDisplay.from_predictions() call
     y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
-    y_train_probs_rf = cv_rfc.best_estimator_.predict_proba(X_train)[:,1]
+    y_train_probs_rf = cv_rfc.best_estimator_.predict_proba(X_train)[:, 1]
     y_train_preds_lr = lrc.predict(X_train)
     y_train_probs_lr = lrc.predict_proba(X_train)[:, 1]
     y_test_preds_rf = cv_rfc.best_estimator_.predict(X_test)
-    y_test_probs_rf = cv_rfc.best_estimator_.predict_proba(X_test)[:,1]
+    y_test_probs_rf = cv_rfc.best_estimator_.predict_proba(X_test)[:, 1]
     y_test_preds_lr = lrc.predict(X_test)
-    y_test_probs_lr = lrc.predict_proba(X_test)[:,1]
+    y_test_probs_lr = lrc.predict_proba(X_test)[:, 1]
 
     # Get classification_reports and ROC curves
     classification_report_image(y_train, y_test,
@@ -289,21 +308,23 @@ def main():
 
     input
         None
-
     output:
         None
     '''
     # Define parameters
     raw_data_path = r".\data\bank_data.csv"
     cat_recode_lst = [
-        'Gender', 'Education_Level', 'Marital_Status', 'Income_Category', 'Card_Category'
-    ]
+        'Gender',
+        'Education_Level',
+        'Marital_Status',
+        'Income_Category',
+        'Card_Category']
     features_lst = [
         'Customer_Age', 'Dependent_count', 'Months_on_book',
         'Total_Relationship_Count', 'Months_Inactive_12_mon',
         'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
         'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
-         'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio',
+        'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio',
         'Gender_Churn', 'Education_Level_Churn', 'Marital_Status_Churn',
         'Income_Category_Churn', 'Card_Category_Churn'
     ]
@@ -311,8 +332,8 @@ def main():
     custs = import_data(raw_data_path)
     custs = derive_label(custs)
     perform_eda(custs)
-    X_train, X_test, y_train, y_test = perform_feature_engineering(custs, cat_recode_lst,
-                                                                   features_lst)
+    X_train, X_test, y_train, y_test = perform_feature_engineering(
+        custs, cat_recode_lst, features_lst)
     train_models(X_train, X_test, y_train, y_test, features_lst)
 
 

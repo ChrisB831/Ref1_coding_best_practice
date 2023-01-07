@@ -2,7 +2,7 @@
 A test script to test the functionality of churn_model_build.py
 
 Author: Chris Bonham
-Date: 8th January 2023
+Date: 7th January 2023
 '''
 import logging
 import os
@@ -200,7 +200,7 @@ def test_train_models(train_models, Xtrain, Xtest, ytrain, ytest, feat_lst):
 					  "missing")
 
     try:
-    # Test 9: Have the model files been created
+        # Test 9: Have the model files been created
         assert os.path.exists(r".\models\logistic_model.pkl")
         assert os.path.exists(r".\models\rfc_model.pkl")
 
