@@ -4,18 +4,15 @@ for credit card customers.
 Data taken from  https://www.kaggle.com/sakshigoyal7/credit-card-customers/code
 
 Author: Chris Bonham
-Date: 5th January 2023
+Date: 8th January 2023
 '''
-
 import pickle
-
 from sklearn.utils import resample
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import RocCurveDisplay, classification_report
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,20 +27,33 @@ def import_data(pth):
 
     input:
         pth: a string containing a path to the csv
-
     output:
-        df: pandas dataframe
+        df: pandas dataframe. Imported development data
     '''
     df = pd.read_csv(pth, index_col=0)
     # df = pd.read_csv(pth, index_col=0, nrows = 5)
     return df
 
 
+def derive_label(df, response = 'Churn'):
+    '''Derive the target field. NB This assumes a binary classifier
+
+    input:
+        df: pandas dataframe. Development data
+        response: string of response name [optional argument that could be used
+                  for naming variables or index y column]
+    output:
+        df: pandas dataframe with new target field
+    '''
+    df[response] = df['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
+    return df
+
+
 def perform_eda(df):
     '''Perform eda on df and save figures to images folder
-    input:
-        df: pandas dataframe
 
+    input:
+        df: pandas dataframe. Development data
     output:
         None
     '''
@@ -81,21 +91,6 @@ def perform_eda(df):
     plt.savefig(r".\images\eda\Numeric_feature_correlations.png")
 
 
-def derive_label(df, response = 'Churn'):
-    '''Derive the target field. NB This assumes a binary classifier
-
-    input:
-        df: pandas dataframe
-        response: string of response name [optional argument that could be used
-                  for naming variables or index y column]
-
-    output:
-        df: pandas dataframe with new target field
-    '''
-    df[response] = df['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
-    return df
-
-
 def encoder_helper(df, cat_recode_lst, response = 'Churn'):
     '''
     helper function to turn each categorical column into a new column with
@@ -106,7 +101,6 @@ def encoder_helper(df, cat_recode_lst, response = 'Churn'):
         cat_recode_lst: list of columns that contain categorical features to recode
         response: string of response name [optional argument that could be used for
                   naming variables or index y column]
-
     output:
         df: pandas dataframe with new columns for
     '''
@@ -120,17 +114,16 @@ def perform_feature_engineering(df, cat_recode_lst, features_lst, response = 'Ch
     '''Recode the categorical features and split data into train and test datasets
 
     input:
-        df: pandas dataframe
+        df: pandas dataframe. Development data
         cat_recode_lst: list of columns that contain categorical features to recode
         features_lst: list of columns to include as model features
         response: string of response name [optional argument that could be used for
                   naming variables or index y column]
-
     output:
-        X_train: X training data features
-        X_test: X testing data features
-        y_train: y training data labels
-        y_test: y testing data labels
+        X_train: pandas dataframe. training data features
+        X_test: pandas dataframe. testing data features
+        y_train: pandas series. training data labels
+        y_test: pandas series. testing data labels
     '''
     # Recode the categorical fields
     df = encoder_helper(df, cat_recode_lst)
@@ -148,7 +141,7 @@ def classification_report_image(y_train, y_test,
                                 y_test_preds_lr, y_test_preds_rf,
                                 y_train_probs_lr, y_train_probs_rf,
                                 y_test_probs_lr, y_test_probs_rf):
-    '''produce classification report and ROC curves for training and test data and store in
+    '''Produce classification report and ROC curves for training and test data and store in
     images folder
     NB The probabilities are need to generate the ROC curves. I could pass the model object
     but as the predictions have already been calculated it seems inefficient to regenrate
@@ -164,7 +157,6 @@ def classification_report_image(y_train, y_test,
         y_train_prob_rf: training predictions (probability) from random forest
         y_test_prob_lr: test predictions (probability) from logistic regression
         y_test_prob_rf: test predictions (probability) from random forest
-
     output:
              None
     '''
@@ -210,7 +202,6 @@ def feature_importance_plot(model, features_lst, output_pth):
         model: model object containing feature_importances_
         features_lst: list of columns to include as model features
         output_pth: path to store the figure
-
     output:
         None
     '''
@@ -234,14 +225,13 @@ def train_models(X_train, X_test, y_train, y_test, features_lst):
     '''Train, assess and save models
 
     input:
-          X_train: X training data
-          X_test: X testing data
-          y_train: y training data
-          y_test: y testing data
-          features_lst: list of columns to include as model features
-
+        X_train: pandas dataframe. training data features
+        X_test: pandas dataframe. testing data features
+        y_train: pandas series. training data labels
+        y_test: pandas series. testing data labels
+        features_lst: list of columns to include as model features
     output:
-          None
+        None
     '''
     # Initialise the models
     rfc = RandomForestClassifier(random_state=42)

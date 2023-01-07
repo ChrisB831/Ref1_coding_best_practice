@@ -45,18 +45,14 @@ where
 
 
 ## `bank_data.csv`
-
 This dataset consists of 10,000 customers mentioning their age, salary, marital_status, credit card limit, credit card category, etc. There are nearly 18 features.
-
 Churn rate is 16.07% of customers who have churned, there are no missing value in the dataset.
-
 The first field contains the row index
 
 
 
 ## `churn_model_build.py`
 This is the main model build module, containing all the code needed to:
-
 * Import the data
 * Derive the target field
 * Perform an EDA and write the results to the `images\eda` folder
@@ -86,7 +82,7 @@ This module contains all the code to test the main module build module. This foc
 * Check the returned  items are not empty
 * Check that folders are populated with required results 
 
-The resulting test log is written to the `logs` folder
+The resulting test log (`cmb_test.log`)  is written to the `logs` folder
 
 The test script can be module executed as a top level script via
 `python cmb_test.py`
@@ -94,7 +90,6 @@ The test script can be module executed as a top level script via
 
 
 ## `requirements.txt`
-
-Contains all the dependencies for the project, these mat be installed via
-`pip install -r requirements.txt`
+Contains all the dependencies for the project, these mat be installed via  
+`python -m pip install -r requirements.txt`
 
