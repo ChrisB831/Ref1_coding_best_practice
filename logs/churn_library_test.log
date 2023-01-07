@@ -1,0 +1,8 @@
+07-Jan-23 17:16:34 - INFO - test import_data: SUCCESS. File found
+07-Jan-23 17:16:34 - INFO - test import_data: SUCCESS. Shape of dataframe is (10127, 21)
+07-Jan-23 17:16:34 - INFO - test derive_label: SUCCESS. 'Churn' field has been created
+07-Jan-23 17:16:34 - INFO - test eda: SUCCESS. Output path exists
+07-Jan-23 17:16:45 - INFO - test eda: SUCCESS. Correct number of eda files generated
+07-Jan-23 17:16:45 - INFO - test perform_feature_engineering SUCCESS. Training data has been created
+07-Jan-23 17:21:23 - INFO - test train_model SUCCESS. Training results created
+07-Jan-23 17:21:23 - INFO - test train_model SUCCESS. Models saved

@@ -17,8 +17,8 @@ The project structure is
 │   └── results
 ├── logs
 ├── models
-├── churn_model_build.py
-├── cmb_testing.py
+├── churn_library.py
+├── churn_script_logging_and_tests.py
 ├── LICENSE
 ├── README.me
 └── requirements.txt
@@ -32,8 +32,8 @@ where
 | images\results | directory | model performance analysis output |
 | logs | directory | test logs |
 | models | directory | saved models |
-| churn_model_build.py | Python module | model build module |
-| cmb_testing.py | Python module |module build module test script|
+| churn_library.py | Python module | model build module |
+| churn_script_logging_and_tests.py | Python module |module build module test script|
 | LICENSE | licence file|licence T&Cs|
 | README.me | markdown file | this project readme |
 | requirements.txt |text file | project dependencies |
@@ -51,7 +51,7 @@ The first field contains the row index
 
 
 
-## `churn_model_build.py`
+## `churn_library.py`
 This is the main model build module, containing all the code needed to:
 * Import the data
 * Derive the target field
@@ -64,7 +64,7 @@ This is the main model build module, containing all the code needed to:
 
 
 The module can be executed as either as a top level script via
-`python churn_model_build.py`
+`python churn_library.py`
 or via importing the module and running the `main` function
 
 
@@ -77,15 +77,15 @@ The `main` function contains three objects
 
 
 
-## `cmb_test.py`
+## `churn_script_logging_and_tests.py`
 This module contains all the code to test the main module build module. This focusses on the following criteria:
 * Check the returned  items are not empty
 * Check that folders are populated with required results 
 
-The resulting test log (`cmb_test.log`)  is written to the `logs` folder
+The resulting test log (`churn_library_test.log`)  is written to the `logs` folder
 
 The test script can be module executed as a top level script via
-`python cmb_test.py`
+`python churn_script_logging_and_tests.py`
 
 
 
