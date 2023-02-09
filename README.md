@@ -13,7 +13,7 @@ The project structure is
 ├── data
 │   └── bank_data.csv
 ├── images
-│	├── eda
+│	  ├── eda
 │   └── results
 ├── logs
 ├── models
