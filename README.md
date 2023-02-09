@@ -1,3 +1,14 @@
+# Summary 
+This project focusses on 
+* Testing
+* Logging
+* Best coding practicies
+  * Running as a CLI
+  * Running Pylint
+  * Running autopep8
+
+
+
 # Predict Customer Churn
 Project **Predict Customer Churn** of ML DevOps Engineer Nanodegree Udacity
 This project identifies credit card customers that are most likely to churn. The project contains a Python package for a machine learning project that follows coding (PEP8) and engineering best practices for implementing software (modular, documented, and tested). The package also has the flexibility of being run interactively or from the command-line interface (CLI).
