@@ -7,6 +7,8 @@ This project focusses on
   * Running Pylint
   * Running autopep8
 
+Although an ML model is built, it is trivial in design and is not the focus of this MLOps based repo
+
 
 
 # Predict Customer Churn
